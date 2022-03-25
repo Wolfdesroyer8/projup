@@ -14,7 +14,9 @@ int main(int argc, char *argv[]) {
   FILE *cfile;
   cfile = fopen("Makefile", "a");
   fprintf(cfile, "%s: main.c\n", name);
-  fprintf(cfile, "\tclang main.c -o %s -g -O3 -std=gnu11", name);
+  fprintf(cfile, "\tclang main.c -o %s -g -O3 -std=gnu11\n", name);
+  fprintf(cfile, "install: %s\n", name);
+  fprintf(cfile, "\tinstall %s /usr/bin/%s", name, name);
   fclose(cfile);
 
   // Adds the main.c file
@@ -31,6 +33,7 @@ int main(int argc, char *argv[]) {
   cfile = fopen(".gitignore", "a");
   fprintf(cfile, "%s", name);
   fclose(cfile);
+
   // Selects license
   system("set-license");
   return 0;

@@ -31,8 +31,15 @@ int main(int argc, char *argv[]) {
 
   // Adds .gitignore file for the binary
   cfile = fopen(".gitignore", "a");
+  fprintf(cfile, "# %s\n", name);
   fprintf(cfile, "%s", name);
   fclose(cfile);
+
+  // Adds readme file
+  cfile = fopen("README.md", "a");
+  fprintf(cfile, "# %s\n", name);
+  fprintf(cfile, "## Usage\n");
+  fprintf(cfile, "## Installation\n");
 
   // Selects license
   system("set-license");

@@ -13,10 +13,13 @@ int main(int argc, char *argv[]) {
   // Adds Makefile
   FILE *cfile;
   cfile = fopen("Makefile", "a");
-  fprintf(cfile, "%s: main.c\n", name);
-  fprintf(cfile, "\tclang main.c -o %s -g -O3 -std=gnu11\n", name);
-  fprintf(cfile, "install: %s\n", name);
-  fprintf(cfile, "\tinstall %s /usr/bin/%s", name, name);
+  fprintf(cfile, "NAME=%s\n", name);
+  fprintf(cfile, "${NAME}: main.c\n");
+  fprintf(cfile, "\tcc main.c -o ${NAME} -ggdb -O3 -std=gnu11\n");
+  fprintf(cfile, "install: ${NAME}\n");
+  fprintf(cfile, "\tinstall ${NAME} /usr/bin/${NAME}\n");
+  fprintf(cfile, "clean:\n");
+  fprintf(cfile, "\trm ${NAME}");
   fclose(cfile);
 
   // Adds the main.c file

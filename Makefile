@@ -1,7 +1,13 @@
+CFLAGS= -Wall -Wextra -ggdb -O3 -std=gnu11
+
 projup: main.c
-	cc main.c -o projup -O3 -ggdb -std=gnu11
+	cc main.c -o projup ${CFLAGS}
 
 install: projup
-	install projup /usr/bin/projup
+	install -D projup /usr/bin/
+
+uninstall:
+	rm /usr/bin/projup
+	
 clean:
 	rm projup

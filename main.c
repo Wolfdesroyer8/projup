@@ -1,50 +1,111 @@
+#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
 
-int main(int argc, char *argv[]) {
-  // Check for inputed name if not the main is the name
+extern int errno;
+
+int main(int argc, char **argv) {
+  int type;
   char *name;
-  if (argc == 1) {
-    name = "main";
+  FILE *currentfile;
+
+  if (argc < 3) {
+    printf("Projup - A tool to quickly generate c projects"
+           "\n\nusage: projup [<type>] [<name>]"
+           "\n\nTypes: bin/lib"
+           "\nbin - Creates a project that compiles to a runnable binay"
+           "\nlib - Create a project that compiles to a library"
+           "\n\nName: String"
+           "\nThe name of the project\n");
+    return 1;
+  } else if (strcmp(argv[1], "bin") == 0) {
+    type = 0;
+    name = argv[2];
+  } else if (strcmp(argv[1], "lib") == 0) {
+    type = 1;
+    name = argv[2];
   } else {
-    name = argv[1];
+    printf("Type must be \"bin\" or \"lib\"\n");
+    return 1;
   }
 
-  // Adds Makefile
-  FILE *cfile;
-  cfile = fopen("Makefile", "a");
-  fprintf(cfile, "NAME=%s\n", name);
-  fprintf(cfile, "${NAME}: main.c\n");
-  fprintf(cfile, "\tcc main.c -o ${NAME} -ggdb -O3 -std=gnu11\n");
-  fprintf(cfile, "install: ${NAME}\n");
-  fprintf(cfile, "\tinstall ${NAME} /usr/bin/${NAME}\n");
-  fprintf(cfile, "clean:\n");
-  fprintf(cfile, "\trm ${NAME}");
-  fclose(cfile);
+  char header[256];
+  strcpy(header, name);
+  strcat(header, ".h");
+  char *files[] = {"Makefile", "main.c", "test.c", header};
 
-  // Adds the main.c file
-  cfile = fopen("main.c", "a");
-  fprintf(cfile, "#include <stdio.h>\n");
-  fprintf(cfile, "\n");
-  fprintf(cfile, "int main(void)\n");
-  fprintf(cfile, "{\n");
-  fprintf(cfile, "return 0;\n");
-  fprintf(cfile, "}");
-  fclose(cfile);
+  // checks if files already exists
+  for (int i = 0; files[i] != NULL; i++) {
+    if (access(files[i], F_OK) == 0) {
+      printf("The file \"%s\" already exists\n", files[i]);
+      exit(1);
+    }
+  }
 
-  // Adds .gitignore file for the binary
-  cfile = fopen(".gitignore", "a");
-  fprintf(cfile, "# %s\n", name);
-  fprintf(cfile, "%s", name);
-  fclose(cfile);
-
-  // Adds readme file
-  cfile = fopen("README.md", "a");
-  fprintf(cfile, "# %s\n", name);
-  fprintf(cfile, "## Usage\n");
-  fprintf(cfile, "## Installation\n");
-
-  // Selects license
-  system("set-license");
+  for (int i = 0; currentfile != NULL; i++) {
+    currentfile = fopen(files[i], "w");
+    if (currentfile == NULL) {
+      printf("current: was");
+      printf("%s\n", strerror(errno));
+      exit(1);
+    }
+    if (i == 0 && type == 0) {
+      fprintf(currentfile,
+              "NAME=%s\n\n"
+              "CFLAGS= -Wall -Wextra -ggdb -O3 -std=gnu11\n\n"
+              "${NAME}: "
+              "main.c\n"
+              "\tcc main.c -o ${NAME} ${CFLAGS}\n\n"
+              "install: ${NAME}\n"
+              "\tinstall -D projup /usr/bin\n\n"
+              "uninstall:\n"
+              "\trm /usr/bin/projup\n\n"
+              "clean:\n"
+              "\trm projup",
+              name);
+    } else if (i == 0 && type == 1) {
+      fprintf(currentfile,
+              "NAME=%s\n\n"
+              "CFLAGS= -Wall -Wextra -ggdb -O3 "
+              "-std=gnu11\n"
+              "TESTFLAGS= -I. -L. -l${NAME}\n\n"
+              ".PHONY: test\n"
+              "${NAME}.o: "
+              "main.c\n"
+              "\tcc main.c -o ${NAME}.o ${CFLAGS} -c -DLOG\n"
+              "ar ruv "
+              "lib${NAME}.a ${NAME}.o\n"
+              "ranlib lib${NAME}.a\n\n"
+              "test: test.c\n\tcc "
+              "test.c -o test ${CFLAGS} ${TESTFLAGS}\n\n"
+              "install: ${NAME}\n"
+              "\tinstall -D lib${NAME}.a /usr/lib/\n\n"
+              "\tinstall -D ${NAME}.h /usr/include/"
+              "uninstall:\n"
+              "\trm /usr/lib/lib${NAME}.a /usr/include/${NAME}/${NAME}.h\n\n"
+              "clean:\n"
+              "\trm lib${NAME}.a ${NAME}.o test test.o",
+              name);
+    } else if (i == 1) {
+      fprintf(currentfile, "#include <stdio.h>\n\n"
+                           "int main(void) {\n"
+                           "\tprintf(\"Hello World\");\n"
+                           "\treturn 0;\n"
+                           "}");
+      if (type == 0) {
+        i = i + 2;
+      }
+    } else if (i == 2 && type == 1) {
+      fprintf(currentfile, "#include <stdio.h>\n\n"
+                           "int main(void) {\n"
+                           "\treturn 0;\n"
+                           "}");
+    } else if (i == 3 && type == 1) {
+      fprintf(currentfile, "#prama once");
+    }
+    fclose(currentfile);
+  }
   return 0;
 }

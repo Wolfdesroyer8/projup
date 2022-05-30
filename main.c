@@ -47,7 +47,6 @@ int main(int argc, char **argv) {
   for (int i = 0; currentfile != NULL; i++) {
     currentfile = fopen(files[i], "w");
     if (currentfile == NULL) {
-      printf("current: was");
       printf("%s\n", strerror(errno));
       exit(1);
     }
@@ -68,16 +67,14 @@ int main(int argc, char **argv) {
     } else if (i == 0 && type == 1) {
       fprintf(currentfile,
               "NAME=%s\n\n"
-              "CFLAGS= -Wall -Wextra -ggdb -O3 "
-              "-std=gnu11\n"
+              "CFLAGS= -Wall -Wextra -ggdb -O3 -std=gnu11\n"
               "TESTFLAGS= -I. -L. -l${NAME}\n\n"
-              ".PHONY: test\n"
+              ".PHONY: test\n\n"
               "${NAME}.o: "
               "main.c\n"
               "\tcc main.c -o ${NAME}.o ${CFLAGS} -c -DLOG\n"
-              "ar ruv "
-              "lib${NAME}.a ${NAME}.o\n"
-              "ranlib lib${NAME}.a\n\n"
+              "\tar ruv lib${NAME}.a ${NAME}.o\n"
+              "\tranlib lib${NAME}.a\n\n"
               "test: test.c\n\tcc "
               "test.c -o test ${CFLAGS} ${TESTFLAGS}\n\n"
               "install: ${NAME}\n"

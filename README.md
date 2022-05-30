@@ -2,7 +2,7 @@
 A tool to quickly make a c project
 ## Usage
 ```console
-projup <TYPE> <NAME>
+$ projup <TYPE> <NAME>
 ```
 ## Installation
 ```console

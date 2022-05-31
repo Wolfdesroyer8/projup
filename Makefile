@@ -5,6 +5,7 @@ projup: main.c
 
 install: projup
 	install -D projup /usr/bin/
+	install -D projup.1 /usr/local/man/man1/
 
 uninstall:
 	rm /usr/bin/projup
